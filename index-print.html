@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="sr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Urbanova Realty — PDF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  @page { size: A4; margin: 0.6cm; }
+  html, body { background: #fff; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page-break { break-before: page; page-break-before: always; }
+  .page-label {
+    font-family: "DM Sans", sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #6b7280;
+    padding: 24px 32px 0;
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 600;
+  }
+  .page-label .tri { color: #1E6FD9; }
+  /* hide sticky/fixed elements that don't print well */
+  .topbar { position: static !important; }
+  .filter-bar { position: static !important; }
+  .listings-map-col { display: none !important; }
+  .listings-layout { grid-template-columns: 1fr !important; }
+  .listings-main { padding-left: 0 !important; padding-right: 0 !important; }
+  .tweaks { display: none !important; }
+  /* avoid page splits mid-card */
+  .card, .cat, .process-step, .cta-btn, .agent-card { break-inside: avoid; }
+  .section-head, .hero-inner { break-inside: avoid; }
+  /* marquee static */
+  .marquee-track { animation: none !important; }
+  /* slight cap on massive sections */
+  .hero { padding-top: 24px !important; }
+  .section { padding: 48px 0 !important; }
+  .cta-strip .wrap { padding-top: 56px !important; padding-bottom: 56px !important; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="src/data.jsx"></script>
+<script type="text/babel" src="src/icons.jsx"></script>
+<script type="text/babel" src="src/ui.jsx"></script>
+<script type="text/babel" src="src/home.jsx"></script>
+<script type="text/babel" src="src/listings.jsx"></script>
+<script type="text/babel" src="src/detail.jsx"></script>
+<script type="text/babel" src="src/about.jsx"></script>
+<script type="text/babel" src="src/contact.jsx"></script>
+
+<script type="text/babel">
+const { Topbar, Footer, HomePage, ListingsPage, DetailPage, AboutPage, ContactPage, Tri } = window;
+const noop = () => {};
+const detailItem = window.LISTINGS[0];
+const tweaks = { blue: "Umereno", map: false, heroSearch: "bar", density: "air" };
+
+const Label = ({ n, total, title }) => (
+  <div className="page-label">
+    <span><Tri size={9} /> URBANOVA · {n} / {total} · {title}</span>
+    <span>www.urbanova.rs</span>
+  </div>
+);
+
+function PrintDeck() {
+  return (
+    <div>
+      <Topbar page="home" navigate={noop} />
+      <Label n="01" total="05" title="Početna" />
+      <HomePage navigate={noop} openDetail={noop} tweaks={tweaks} />
+
+      <div className="page-break" />
+      <Label n="02" total="05" title="Nekretnine" />
+      <ListingsPage navigate={noop} openDetail={noop} tweaks={{ ...tweaks, map: false }} />
+
+      <div className="page-break" />
+      <Label n="03" total="05" title="Detalj nekretnine" />
+      <DetailPage item={detailItem} navigate={noop} openDetail={noop} />
+
+      <div className="page-break" />
+      <Label n="04" total="05" title="O nama" />
+      <AboutPage navigate={noop} />
+
+      <div className="page-break" />
+      <Label n="05" total="05" title="Kontakt" />
+      <ContactPage navigate={noop} />
+
+      <Footer />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<PrintDeck />);
+
+// Auto-print once everything is ready
+(async () => {
+  try { await document.fonts.ready; } catch(e) {}
+  // wait for images
+  const imgs = [...document.images];
+  await Promise.all(imgs.map(img => img.complete ? null : new Promise(res => { img.onload = img.onerror = res; })));
+  setTimeout(() => window.print(), 800);
+})();
+</script>
+</body>
+</html>
